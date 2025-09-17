@@ -12,6 +12,8 @@ game.Play();
 
 class BullsCows
 {
+    private int _winsCount = 0;
+    private int _lossesCount = 0;
     private int _selectedDifficulty;
     private Difficulty _currentDifficulty;
     private List<Difficulty> _difficultyPresets = new()
@@ -45,8 +47,10 @@ class BullsCows
         // Развлекательные, «экспериментальные" пресеты
         new Difficulty(name: "Одна из каждой (все символы)", minAllowed: 0, maxAllowed: 17, answerLength: 18, maxAttempts: 30, uniqueCharactersOnly: true, showRightRepetitions: false, showWrongRepetitions: false, showNumbersOnly: false),
         new Difficulty(name: "Сюрприз", minAllowed: 3, maxAllowed: 12, answerLength: 5, maxAttempts: 7, uniqueCharactersOnly: false, showRightRepetitions: true, showWrongRepetitions: true, showNumbersOnly: false),
+        // Wifey <3
+        new Difficulty(name: "Lechu <3", minAllowed: 1, maxAllowed: 9, answerLength: 10, maxAttempts: 3, uniqueCharactersOnly: false, showRightRepetitions: true, showWrongRepetitions: false, showNumbersOnly: false),
         // Кастомная сложность
-        new Difficulty(name: "Custom", minAllowed: 1, maxAllowed: 10, answerLength: 5, maxAttempts: 5, uniqueCharactersOnly: false, showRightRepetitions: true, showWrongRepetitions: true, showNumbersOnly: false),
+        new Difficulty(name: "Custom", minAllowed: 0, maxAllowed: 9, answerLength: 5, maxAttempts: 5, uniqueCharactersOnly: false, showRightRepetitions: true, showWrongRepetitions: true, showNumbersOnly: false),
     };
 
     private List<char> _answer = new();
@@ -140,8 +144,11 @@ class BullsCows
             Console.WriteLine(@$"Только уникальные значения: {_currentDifficulty.UniqueCharactersOnly}
 Индикатор повторений правильностоящих значений: {_currentDifficulty.ShowRightRepetitions}
 Индикатор повторений НЕ правильностоящих значений: {_currentDifficulty.ShowWrongRepetitions}
-Только цифры в подсказках: {_currentDifficulty.ShowNumbersOnly}");
-            Console.WriteLine("-----------------------------------");
+Только цифры в подсказках: {_currentDifficulty.ShowNumbersOnly}
+----------- Статистика! -----------
+Число побед: {_winsCount}
+Число проигрышей: {_lossesCount}
+-----------------------------------");
             Console.WriteLine(@"[1]. Изменить настройки
 [2]. Список уровней сложности
 [3]. Выбрать сложность
@@ -253,11 +260,14 @@ class BullsCows
         if (UserGuess())
         {
             Console.WriteLine(value: "Поздравляю, вы победили!\nЕщё одна великая победа на ваш счёт!");
+            _winsCount++;
         }
         else
         {
             Console.WriteLine(value: "Попытки закончились.\nВ следующий раз точно получится!");
+            _lossesCount++;
         }
+        SaveSettings();
         Console.Write("ans:");
         foreach (var item in _answer)
         {
@@ -438,6 +448,8 @@ class BullsCows
 
     private class SettingsDto
     {
+        public int Wins { get; set; }
+        public int Losses { get; set; }
         public int SelectedDifficultyIndex { get; set; }
         public Difficulty CustomDifficulty { get; set; }
     }
@@ -451,10 +463,12 @@ class BullsCows
 
         string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cut9", "BullsAndCows");
         Directory.CreateDirectory(dir);
-        string configPath = Path.Combine(dir, "Settings.json");
+        string configPath = Path.Combine(dir, "Save.json");
 
         var dto = new SettingsDto
         {
+            Wins = _winsCount,
+            Losses = _lossesCount,
             SelectedDifficultyIndex = _selectedDifficulty,
             CustomDifficulty = _difficultyPresets[_difficultyPresets.Count - 1]
         };
@@ -468,7 +482,7 @@ class BullsCows
         try
         {
             string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cut9", "BullsAndCows");
-            string configPath = Path.Combine(dir, "Settings.json");
+            string configPath = Path.Combine(dir, "Save.json");
 
             if (!File.Exists(configPath))
             {
@@ -481,6 +495,8 @@ class BullsCows
 
             if (loaded?.CustomDifficulty != null && ValidateDifficulty(loaded.CustomDifficulty))
             {
+                _winsCount = loaded.Wins;
+                _lossesCount = loaded.Losses;
                 _difficultyPresets[_difficultyPresets.Count - 1] = loaded.CustomDifficulty;
                 _selectedDifficulty = Math.Clamp(loaded.SelectedDifficultyIndex, 0, _difficultyPresets.Count - 1);
                 _currentDifficulty = _difficultyPresets[_selectedDifficulty];
@@ -502,8 +518,6 @@ class BullsCows
         if (d.MinAllowed < 0 || d.MinAllowed >= _possibleChars.Count) return false;
         if (d.MaxAllowed < d.MinAllowed || d.MaxAllowed >= _possibleChars.Count) return false;
         if (d.AnswerLength <= 0 || d.AnswerLength > 64) return false;
-        // булевы поля в валидаторах не нужны — они уже bool
         return true;
     }
-
 }
