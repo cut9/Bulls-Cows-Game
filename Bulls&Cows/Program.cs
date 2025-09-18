@@ -48,7 +48,7 @@ class BullsCows
         new Difficulty(name: "Одна из каждой (все символы)", minAllowed: 0, maxAllowed: 17, answerLength: 18, maxAttempts: 30, uniqueCharactersOnly: true, showRightRepetitions: false, showWrongRepetitions: false, showNumbersOnly: false),
         new Difficulty(name: "Сюрприз", minAllowed: 3, maxAllowed: 12, answerLength: 5, maxAttempts: 7, uniqueCharactersOnly: false, showRightRepetitions: true, showWrongRepetitions: true, showNumbersOnly: false),
         // Wifey <3
-        new Difficulty(name: "Lechu <3", minAllowed: 1, maxAllowed: 9, answerLength: 10, maxAttempts: 3, uniqueCharactersOnly: false, showRightRepetitions: true, showWrongRepetitions: false, showNumbersOnly: false),
+        new Difficulty(name: "Lechu <3", minAllowed: 2, maxAllowed: 7, answerLength: 5, maxAttempts: 4, uniqueCharactersOnly: false, showRightRepetitions: true, showWrongRepetitions: false, showNumbersOnly: false),
         // Кастомная сложность
         new Difficulty(name: "Custom", minAllowed: 0, maxAllowed: 9, answerLength: 5, maxAttempts: 5, uniqueCharactersOnly: false, showRightRepetitions: true, showWrongRepetitions: true, showNumbersOnly: false),
     };
