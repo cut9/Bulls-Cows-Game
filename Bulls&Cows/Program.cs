@@ -149,26 +149,23 @@ class BullsCows
 Число побед: {_winsCount}
 Число проигрышей: {_lossesCount}
 -----------------------------------");
-            Console.WriteLine(@"[1]. Изменить настройки
-[2]. Список уровней сложности
-[3]. Выбрать сложность
-[4]. Изменить кастомную сложность
-[5]. Назад");
-            int userInput = Choice(1, 5);
+            Console.WriteLine(@"[1]. Список уровней сложности
+[2]. Выбрать сложность
+[3]. Изменить кастомную сложность
+[4]. Назад");
+            int userInput = Choice(1, 4);
             switch (userInput)
             {
                 case 1:
-                    break;
-                case 2:
                     ShowDifficultyList();
                     break;
-                case 3:
+                case 2:
                     ChangeDifficulty();
                     break;
-                case 4:
+                case 3:
                     ChangeCustumDifficulty();
                     break;
-                case 5:
+                case 4:
                     return;
             }
         }
