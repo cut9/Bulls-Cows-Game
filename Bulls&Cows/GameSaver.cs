@@ -25,7 +25,7 @@ namespace Bulls_Cows
         {
             Directory.CreateDirectory(_mainPath);
             string filePath = Path.Combine(_mainPath, _gameStatePath);
-            var gameStateSave = new GameStateFile(gameState.SelectedPresetIndex, gameState.Win, gameState.Loss);
+            var gameStateSave = new GameStateFile(gameState.SelectedPresetIndex, gameState.Win, gameState.Loss, gameState.LastDaily);
             string json = JsonSerializer.Serialize(gameStateSave, JsonOptions);
             File.WriteAllText(filePath, json);
         }

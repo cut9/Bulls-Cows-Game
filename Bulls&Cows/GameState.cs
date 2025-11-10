@@ -19,5 +19,6 @@ namespace Bulls_Cows
         public void IncrementAttempt() => CurrentAttempt++;
         public void NewWin() => Win++;
         public void NewLoss() => Loss++;
+        public int LastDaily {  get; set; }
     }
 }

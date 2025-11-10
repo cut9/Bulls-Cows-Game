@@ -328,6 +328,7 @@ namespace Bulls_Cows
         public void SceneTransition()
         {
             Console.Clear();
+            Console.CursorVisible = false;
             _menuYBuffer = 0;
             _historyYBuffer = 0;
         }

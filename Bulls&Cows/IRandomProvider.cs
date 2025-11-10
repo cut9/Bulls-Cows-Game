@@ -9,5 +9,6 @@ namespace Bulls_Cows
     internal interface IRandomProvider
     {
         int Next(int minInclusive, int maxExclusive);
+        double NextDouble();
     }
 }

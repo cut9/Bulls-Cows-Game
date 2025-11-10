@@ -6,52 +6,74 @@ namespace Bulls_Cows
     {
         public bool TryLoadOutputColorSettings(IRender render)
         {
-            string filePath = Path.Combine(_mainPath, _outputColorsPath);
-            if (!File.Exists(filePath))
+            try
+            {
+                string filePath = Path.Combine(_mainPath, _outputColorsPath);
+                if (!File.Exists(filePath))
+                    return false;
+                string jsonContent = File.ReadAllText(filePath);
+                var loaded = JsonSerializer.Deserialize<List<int>>(jsonContent);
+                if (loaded == null)
+                    return false;
+                return render.TryLoadSettings(loaded);
+            }
+            catch (Exception)
+            {
                 return false;
-            string jsonContent = File.ReadAllText(filePath);
-            var loaded = JsonSerializer.Deserialize<List<int>>(jsonContent);
-            if (loaded == null)
-                return false;
-            return render.TryLoadSettings(loaded);
+            }
         }
 
         public bool TryLoadGameState(GameState gameState)
         {
-            string filePath = Path.Combine(_mainPath, _gameStatePath);
-            if (!File.Exists(filePath))
+            try
+            {
+                string filePath = Path.Combine(_mainPath, _gameStatePath);
+                if (!File.Exists(filePath))
+                    return false;
+                string jsonContent = File.ReadAllText(path: filePath);
+                var loaded = JsonSerializer.Deserialize<GameStateFile>(jsonContent);
+                if (loaded == null)
+                    return false;
+                gameState.Win = loaded.WinsCount;
+                gameState.Loss = loaded.LoseCount;
+                gameState.SelectedPresetIndex = loaded.SelectedIndex;
+                gameState.LastDaily = loaded.LastDaily;
+                return true;
+            }
+            catch (Exception)
+            {
                 return false;
-            string jsonContent = File.ReadAllText(path: filePath);
-            var loaded = JsonSerializer.Deserialize<GameStateFile>(jsonContent);
-            if (loaded == null)
-                return false;
-            gameState.Win = loaded.WinsCount;
-            gameState.Loss = loaded.LoseCount;
-            gameState.SelectedPresetIndex = loaded.SelectedIndex;
-            return true;
+            }
         }
         public bool TryLoadPresetList(PresetStore presetStore, int _maxAnswerLength, int _maxAttemptNumber)
         {
-            string filePath = Path.Combine(_mainPath, _presetStorePath);
-            if (!File.Exists(filePath))
-                return false;
-            string jsonContent = File.ReadAllText(filePath);
-            var loaded = JsonSerializer.Deserialize<List<Preset>>(jsonContent);
-            if (loaded == null)
-                return false;
-            foreach (var preset in loaded)
+            try
             {
-                bool answerLength = preset.AnswerSettings.MaxAnswerLength > _maxAnswerLength || preset.AnswerSettings.MaxAnswerLength < 1;
-                bool numberOfAttempt = preset.NumberOfAttempts > _maxAttemptNumber || preset.NumberOfAttempts < 1;
-                bool uniqueOnly = preset.AnswerSettings.UniqueOnly && preset.CharsPool.Count < preset.AnswerSettings.MaxAnswerLength;
-                if (!(answerLength || numberOfAttempt || uniqueOnly))
+                string filePath = Path.Combine(_mainPath, _presetStorePath);
+                if (!File.Exists(filePath))
+                    return false;
+                string jsonContent = File.ReadAllText(filePath);
+                var loaded = JsonSerializer.Deserialize<List<Preset>>(jsonContent);
+                if (loaded == null)
+                    return false;
+                foreach (var preset in loaded)
                 {
-                    presetStore.AddOrUpdate(preset);
+                    bool answerLength = preset.AnswerSettings.MaxAnswerLength > _maxAnswerLength || preset.AnswerSettings.MaxAnswerLength < 1;
+                    bool numberOfAttempt = preset.NumberOfAttempts > _maxAttemptNumber || preset.NumberOfAttempts < 1;
+                    bool uniqueOnly = preset.AnswerSettings.UniqueOnly && preset.CharsPool.Count < preset.AnswerSettings.MaxAnswerLength;
+                    if (!(answerLength || numberOfAttempt || uniqueOnly))
+                    {
+                        presetStore.AddOrUpdate(preset);
+                    }
                 }
+                if (presetStore.All.Count == 0)
+                    return false;
+                return true;
             }
-            if (presetStore.All.Count == 0)
+            catch (Exception)
+            {
                 return false;
-            return true;
+            }
         }
     }
 }

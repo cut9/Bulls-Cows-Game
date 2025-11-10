@@ -13,6 +13,7 @@
         AddNewPreset,
         ChangeRenderColors,
         EditPreset,
+        DailyMode,
         Exit
     }
 }

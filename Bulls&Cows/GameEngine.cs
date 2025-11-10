@@ -56,6 +56,7 @@
                 new ContextMenuOption("Начать игру", Scene.Game),
                 new ContextMenuOption("Настройки",Scene.Settings),
                 new ContextMenuOption("Как играть?",Scene.HowToPlay),
+                new ContextMenuOption("Дейли режим",Scene.DailyMode),
                 new ContextMenuOption("Выход", Scene.Exit)
             }));
             _menuStore.AddOrUpdate(new ContextMenu(new List<ContextMenuOption>()
@@ -87,7 +88,26 @@
                     case Scene.PresetChange: ChangePresetMenuScene(); break;
                     case Scene.ChangeRenderColors: ChangeRenderColorsScene(); break;
                     case Scene.HowToPlay: HowToPlayScene(); break;
-                    case Scene.Game: GameScene(); break;
+                    case Scene.Game:
+                        _gameState.SelectedPresetIndex = Math.Clamp(_gameState.SelectedPresetIndex, 0, _presetStore.All.Count - 1);
+                        if (!_presetStore.TryGet(_gameState.SelectedPresetIndex, out Preset _currentPreset))
+                        {
+                            _gameState.CurrentScene = Scene.MainMenu;
+                            continue;
+                        }
+                        GameScene(_currentPreset, _randomProvider); 
+                        break;
+                    case Scene.DailyMode:
+                        if (_gameState.LastDaily == DailyRandomProvider.Seed)
+                        {
+                            _gameState.CurrentScene = Scene.MainMenu;
+                            continue;
+                        }
+                        IRandomProvider DailyRng = new DailyRandomProvider();
+                        GameScene(PresetGenerator.GeneratePreset(DailyRng), DailyRng);
+                        _gameState.LastDaily = DailyRandomProvider.Seed;
+                        _gameSaver.SaveGameState(_gameState);
+                        break;
                     case Scene.Exit: _isRunning = false; continue;
                 }
                 _render.SceneTransition();
@@ -414,7 +434,7 @@
                         isPresetEdited = true;
                         break;
                     case 1:
-                        if (int.TryParse(UserStringInput, out UserNumberInput))
+                        if (int.TryParse(UserStringInput, out UserNumberInput) && !(UniqueOnly && Pool.Count < UserNumberInput))
                         {
                             AnswerLength = Math.Clamp(UserNumberInput, minIntValue, _maxAnswerLength);
                             isPresetEdited = true;
@@ -428,7 +448,7 @@
                         }
                         break;
                     case 3:
-                        if (bool.TryParse(UserStringInput, out UserBoolInput))
+                        if (bool.TryParse(UserStringInput, out UserBoolInput) && !(UserBoolInput && Pool.Count < AnswerLength))
                         {
                             UniqueOnly = UserBoolInput;
                             isPresetEdited = true;
@@ -489,16 +509,9 @@
             _presetStore.TryRemove(PreseteIndex);
             _gameSaver.SavePresetList(_presetStore);
         }
-        private void GameScene()
+        private void GameScene(Preset currentPreset, IRandomProvider randomProvider)
         {
-            _gameState.SelectedPresetIndex = Math.Clamp(_gameState.SelectedPresetIndex, 0, _presetStore.All.Count - 1);
-            if (!_presetStore.TryGet(_gameState.SelectedPresetIndex, out Preset _currentPreset))
-            {
-                _gameState.CurrentScene = Scene.MainMenu;
-                return;
-            }
-
-            _answerGenerator.SetSettings(_currentPreset.CharsPool, _currentPreset.AnswerSettings, _randomProvider);
+            _answerGenerator.SetSettings(currentPreset.CharsPool, currentPreset.AnswerSettings, randomProvider);
             if (!_answerGenerator.TryGenerate(out string answer))
             {
                 _gameState.CurrentScene = Scene.MainMenu;
@@ -508,20 +521,20 @@
             bool isWin = false;
             _gameState.SetAnswer(answer);
             _gameState.ResetCurrentAttempt();
-            List<char> guessPool = _currentPreset.CharsPool.ToList();
+            List<char> guessPool = currentPreset.CharsPool.ToList();
 
-            CellInfo[] slots = new CellInfo[_currentPreset.AnswerSettings.MaxAnswerLength];
+            CellInfo[] slots = new CellInfo[currentPreset.AnswerSettings.MaxAnswerLength];
             for (int i = 0; i < slots.Length; i++)
                 slots[i] = new CellInfo();
 
             List<HistoryData> guessesHistory = new List<HistoryData>();
 
-            while (_gameState.CurrentAttempt <= _currentPreset.NumberOfAttempts)
+            while (_gameState.CurrentAttempt <= currentPreset.NumberOfAttempts)
             {
                 _render.DisplayFrame(guessPool.Count, slots);
-                _render.DisplayCurrentPool(guessPool, _currentPreset.CharsPool.Count);
-                _render.DisplayAttempts(_gameState.CurrentAttempt, _currentPreset.NumberOfAttempts);
-                string userGuess = GetUserGuess(_currentPreset);
+                _render.DisplayCurrentPool(guessPool, currentPreset.CharsPool.Count);
+                _render.DisplayAttempts(_gameState.CurrentAttempt, currentPreset.NumberOfAttempts);
+                string userGuess = GetUserGuess(currentPreset);
 
                 if (userGuess == string.Empty)
                 {
@@ -529,12 +542,12 @@
                 }
                 OutputCharInfo[] matchesInfo = CalculateMatches(userGuess);
 
-                if (!_currentPreset.OutputSettings.DisplayNumbersOnly)
+                if (!currentPreset.OutputSettings.DisplayNumbersOnly)
                 {
-                    _render.DisplayOut(matchesInfo, _currentPreset.OutputSettings);
+                    _render.DisplayOut(matchesInfo, currentPreset.OutputSettings);
                     slots = UpdateOutputSlots(slots, matchesInfo, ref guessPool);
-                    _render.DisplayRightGuessHistory(slots, _currentPreset.OutputSettings);
-                    _render.DisplayWrongGuessHistory(slots, _currentPreset.OutputSettings);
+                    _render.DisplayRightGuessHistory(slots, currentPreset.OutputSettings);
+                    _render.DisplayWrongGuessHistory(slots, currentPreset.OutputSettings);
                 }
                 else
                 {
@@ -551,7 +564,7 @@
                     break;
                 _gameState.IncrementAttempt();
             }
-            GameOver(isWin, _currentPreset.NumberOfAttempts);
+            GameOver(isWin, currentPreset.NumberOfAttempts);
             _gameSaver.SaveGameState(_gameState);
             _gameState.CurrentScene = Scene.MainMenu;
         }

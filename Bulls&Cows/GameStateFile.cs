@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace Bulls_Cows
 {
-    internal record GameStateFile(int SelectedIndex, int WinsCount, int LoseCount);
+    internal record GameStateFile(int SelectedIndex, int WinsCount, int LoseCount, int LastDaily);
 }
