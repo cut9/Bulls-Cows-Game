@@ -534,7 +534,7 @@
                 _render.DisplayFrame(guessPool.Count, slots);
                 _render.DisplayCurrentPool(guessPool, currentPreset.CharsPool.Count);
                 _render.DisplayAttempts(_gameState.CurrentAttempt, currentPreset.NumberOfAttempts);
-                string userGuess = GetUserGuess(currentPreset);
+                string userGuess = GetUserGuess(currentPreset, guessPool);
 
                 if (userGuess == string.Empty)
                 {
@@ -597,7 +597,7 @@
                     guessPool.Remove(matchesInfo[i].Char);
             return slots;
         }
-        private string GetUserGuess(Preset _currentPreset)
+        private string GetUserGuess(Preset _currentPreset, List<char> guessedPool)
         {
             int pos = 0;
             char[] chars = new char[_currentPreset.AnswerSettings.MaxAnswerLength];
@@ -616,7 +616,7 @@
                     case GameCommand.Esc: return string.Empty;
                 }
                 pos = Math.Clamp(pos, 0, _currentPreset.AnswerSettings.MaxAnswerLength - 1);
-                if (userChar == '\0' || !_currentPreset.CharsPool.Contains(userChar))
+                if (userChar == '\0' || !guessedPool.Contains(userChar))
                     continue;
                 chars[pos] = userChar;
                 if (pos + 1 < _currentPreset.AnswerSettings.MaxAnswerLength && chars[pos + 1] == '\0')
