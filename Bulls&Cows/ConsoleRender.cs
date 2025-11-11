@@ -383,7 +383,7 @@ namespace Bulls_Cows
             for (int i = guessesHistory.Count; i > 0; i--)
             {
                 var History = guessesHistory[i - 1];
-                SetCursorWrite(_outDisplayLeft, top, new string(' ', _outDisplayLeft + _minLeftWidth));
+                SetCursorWrite(_outDisplayLeft, top, new string(' ', _outDisplayLeft));
                 SetCursorWrite(_outDisplayLeft, top, $"R{History.RightCount}");
                 SetCursorWrite(_outDisplayLeft + 4, top, $"W{History.WrongCount}");
 

@@ -20,34 +20,55 @@
 
             int NumberOfAttemts;
 
-            double N = 0;
-            double F = Math.Log2((AnswerLength + 1) * (AnswerLength + 2) / 2);
-
+            double N_bits;
             if (UniqueOnly)
             {
+                N_bits = 0.0;
                 for (int i = 0; i < AnswerLength; i++)
-                    N += Math.Log2(PoolLength - i);
+                    N_bits += Math.Log2(PoolLength - i);
             }
             else
             {
-                N = AnswerLength * Math.Log2(PoolLength);
+                N_bits = AnswerLength * Math.Log2(PoolLength);
             }
 
-            int minAttempts = (int)Math.Ceiling(N / F) + 2;
-            int maxAttempts = Math.Max(minAttempts, (int)F) + 2;
+            double feedbackStates;
+            if (NumberDisplayOnlyMode)
+            {
+                feedbackStates = AnswerLength + 1;
+            }
+            else
+            {
+                if (DisplayRight && DisplayWrong)
+                {
+                    feedbackStates = Math.Pow(2, AnswerLength);
+                }
+                else if (!DisplayRight && !DisplayWrong)
+                {
+                    feedbackStates = (AnswerLength + 1) * (AnswerLength + 2) / 2.0;
+                }
+                else
+                {
+                    double a = Math.Pow(2, AnswerLength); 
+                    double b = (AnswerLength + 1) * (AnswerLength + 2) / 2.0;
+                    feedbackStates = Math.Ceiling((a + b) / 2.0);
+                }
+            }
+
+            double F_bits = Math.Log2(Math.Max(1.0, feedbackStates));
+
+            int minAttempts = (int)Math.Ceiling(N_bits / Math.Max(1e-9, F_bits)) + 2;
+            int maxAttempts = Math.Max(minAttempts, (int)Math.Ceiling(F_bits)) + 2;
 
             NumberOfAttemts = rng.Next(minAttempts, maxAttempts);
 
-            if (NumberDisplayOnlyMode)
+            while (Pool.Count < PoolLength)
             {
-                if (!UniqueOnly)
-                {
-                    NumberOfAttemts *= 2;
-                }
-                NumberOfAttemts += (NumberOfAttemts / 2) + 2;
+                int index = rng.Next(0, BasePool.Length);
+                Pool.Add(BasePool[index]);
             }
 
-            Pool = BasePool.Take(PoolLength).ToHashSet();
+            Pool = Pool.OrderBy(x => x).ToHashSet();
 
             AnswerSettings answerSettings = new AnswerSettings(AnswerLength, UniqueOnly);
             OutputSettings outputSettings = new OutputSettings(DisplayRight, DisplayWrong, NumberDisplayOnlyMode);
