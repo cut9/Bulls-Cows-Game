@@ -6,6 +6,7 @@ using System.Text.Unicode;
 using System.Xml.Linq;
 
 Console.OutputEncoding = Encoding.UTF8;
+Console.InputEncoding = Encoding.UTF8;
 
 string _mainPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cut9", "BullsAndCows");
 const string _gameStatePath = "GameState.json";

@@ -49,7 +49,7 @@
                 }
                 else
                 {
-                    double a = Math.Pow(2, AnswerLength); 
+                    double a = Math.Pow(2, AnswerLength);
                     double b = (AnswerLength + 1) * (AnswerLength + 2) / 2.0;
                     feedbackStates = Math.Ceiling((a + b) / 2.0);
                 }
@@ -61,6 +61,27 @@
             int maxAttempts = Math.Max(minAttempts, (int)Math.Ceiling(F_bits)) + 2;
 
             NumberOfAttemts = rng.Next(minAttempts, maxAttempts);
+
+            int difficultyLvl = rng.Next(1, 5);
+            int difficultyBuff = 0;
+
+            switch (difficultyLvl)
+            {
+                case 1:
+                    difficultyBuff = 5;
+                    break;
+                case 2:
+                    difficultyBuff = 3;
+                    break;
+                case 3:
+                    difficultyBuff = 1;
+                    break;
+                case 4:
+                    difficultyBuff = 0;
+                    break;
+            }
+
+            NumberOfAttemts += difficultyBuff;
 
             while (Pool.Count < PoolLength)
             {

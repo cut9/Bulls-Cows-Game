@@ -61,7 +61,7 @@
             }));
             _menuStore.AddOrUpdate(new ContextMenu(new List<ContextMenuOption>()
             {
-                new ContextMenuOption("Настройки присетов", Scene.PresetChange),
+                new ContextMenuOption("Настройки пресетов", Scene.PresetChange),
                 new ContextMenuOption("Настройки цвета", Scene.ChangeRenderColors),
                 new ContextMenuOption("Назад", Scene.MainMenu)
             }));
@@ -143,7 +143,7 @@
 
             int UserNumberInput;
             bool UserBoolInput;
-            int minIntValue = 1;
+            int minIntValue = 2;
 
             for (int i = 0; i < Logs.Count;)
             {
@@ -414,7 +414,7 @@
             bool DisplayWrong = selectedPreset.OutputSettings.DisplayWrongRepetitions;
             HashSet<char> Pool = selectedPreset.CharsPool;
 
-            int minIntValue = 1;
+            int minIntValue = 2;
             int UserNumberInput;
             bool UserBoolInput;
             while (!isPresetEdited)

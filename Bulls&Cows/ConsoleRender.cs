@@ -120,12 +120,14 @@ namespace Bulls_Cows
             Point _frameLastDot = new Point();
             int frameYBuffer = 1;
             int itemsPerRow = Math.Max(1, _poolDisplayWidth / _poolDisplayColumnWidth);
-            int poolRows = (int)Math.Ceiling(poolLength / (double)itemsPerRow);
+            int poolRows = (int)Math.Ceiling(poolLength / (double)itemsPerRow) + 2;
 
             _frameLastDot.Y = Math.Max(_minTopWidth, Math.Max(poolRows, _userWrongGuessHistoryDisplayTop + _historyYBuffer + frameYBuffer));
             _frameLastDot.X = _minLeftWidth + _attemptDisplayLeft + slot.Length * _slotDisplayWidth;
 
-            SetCursorWrite(0, _frameLastDot.Y - 1, new string(' ', Math.Max(0, _frameLastDot.X)));
+            SetCursorWrite(0, _frameLastDot.Y - 1, text: new string(' ', Math.Max(0, _frameLastDot.X)));
+            SetCursorWrite(0, _frameLastDot.Y + 1, text: new string(' ', Math.Max(0, _frameLastDot.X)));
+            SetCursorWrite(0, _frameLastDot.Y + 2, text: new string(' ', Math.Max(0, _frameLastDot.X)));
 
             DrawFrame(_frameFirstDot, _frameLastDot);
 
